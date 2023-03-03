@@ -36,6 +36,7 @@ urlpatterns = [
 
 
     path('admin-dashboard', views.admin_dashboard_view,name='admin-dashboard'),
+    path('receptionist-dashboard', views.receptionist_dashboard_view,name='receptionist-dashboard'),
 
     path('admin-doctor', views.admin_doctor_view,name='admin-doctor'),
     path('admin-view-doctor', views.admin_view_doctor_view,name='admin-view-doctor'),
@@ -50,13 +51,15 @@ urlpatterns = [
 
     path('admin-patient', views.admin_patient_view,name='admin-patient'),
     path('admin-view-patient', views.admin_view_patient_view,name='admin-view-patient'),
+    path('receptionist-view-patient', views.receptionist_view_patient_view,name='receptionist-view-patient'),
     path('delete-patient-from-hospital/<int:pk>', views.delete_patient_from_hospital_view,name='delete-patient-from-hospital'),
     path('update-patient/<int:pk>', views.update_patient_view,name='update-patient'),
     path('admin-add-patient', views.admin_add_patient_view,name='admin-add-patient'),
-    path('admin-approve-patient', views.admin_approve_patient_view,name='admin-approve-patient'),
+    path('receptionist-add-patient', views.receptionist_add_patient_view,name='receptionist-add-patient'),
+    path('receptionist-approve-patient', views.receptionist_approve_patient_view,name='receptionist-approve-patient'),
     path('approve-patient/<int:pk>', views.approve_patient_view,name='approve-patient'),
     path('reject-patient/<int:pk>', views.reject_patient_view,name='reject-patient'),
-    path('admin-discharge-patient', views.admin_discharge_patient_view,name='admin-discharge-patient'),
+    path('receptionist-discharge-patient', views.receptionist_discharge_patient_view,name='receptionist-discharge-patient'),
     path('discharge-patient/<int:pk>', views.discharge_patient_view,name='discharge-patient'),
     path('download-pdf/<int:pk>', views.download_pdf_view,name='download-pdf'),
 
