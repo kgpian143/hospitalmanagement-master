@@ -36,6 +36,11 @@ def patientclick_view(request):
         return HttpResponseRedirect('afterlogin')
     return render(request,'hospital/patientclick.html')
 
+def receptionistclick_view(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect('afterlogin')
+    return render(request,'hospital/receptionistclick.html')
+
 
 
 
@@ -94,6 +99,26 @@ def patient_signup_view(request):
             my_patient_group[0].user_set.add(user)
         return HttpResponseRedirect('patientlogin')
     return render(request,'hospital/patientsignup.html',context=mydict)
+
+def receptionist_signup_view(request):
+    userForm=forms.PatientUserForm()
+    patientForm=forms.PatientForm()
+    mydict={'userForm':userForm,'patientForm':patientForm}
+    if request.method=='POST':
+        userForm=forms.PatientUserForm(request.POST)
+        patientForm=forms.PatientForm(request.POST,request.FILES)
+        if userForm.is_valid() and patientForm.is_valid():
+            user=userForm.save()
+            user.set_password(user.password)
+            user.save()
+            patient=patientForm.save(commit=False)
+            patient.user=user
+            patient.assignedDoctorId=request.POST.get('assignedDoctorId')
+            patient=patient.save()
+            my_patient_group = Group.objects.get_or_create(name='PATIENT')
+            my_patient_group[0].user_set.add(user)
+        return HttpResponseRedirect('receptionistlogin')
+    return render(request,'hospital/receptionistsignup.html',context=mydict)
 
 
 
