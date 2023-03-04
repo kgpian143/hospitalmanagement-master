@@ -36,6 +36,20 @@ class DoctorForm(forms.ModelForm):
 
 
 
+class ReceptionistUserForm(forms.ModelForm):
+    class Meta:
+        model=User
+        fields=['first_name','last_name','username','password']
+        widgets = {
+        'password': forms.PasswordInput()
+        }
+class ReceptionistForm(forms.ModelForm):
+    class Meta:
+        model=models.Receptionist
+        fields=['status']
+
+
+
 #for teacher related form
 class PatientUserForm(forms.ModelForm):
     class Meta:
