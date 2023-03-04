@@ -416,8 +416,8 @@ def delete_patient_from_hospital_view(request,pk):
 
 
 
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@login_required(login_url='doctorlogin')
+@user_passes_test(is_doctor)
 def update_patient_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
     user=models.User.objects.get(id=patient.user_id)
@@ -428,16 +428,21 @@ def update_patient_view(request,pk):
     if request.method=='POST':
         userForm=forms.PatientUserForm(request.POST,instance=user)
         patientForm=forms.PatientForm(request.POST,request.FILES,instance=patient)
+        print("yes1")
         if userForm.is_valid() and patientForm.is_valid():
             user=userForm.save()
             user.set_password(user.password)
             user.save()
             patient=patientForm.save(commit=False)
             patient.status=True
-            patient.assignedDoctorId=request.POST.get('assignedDoctorId')
+            print("yes")
+            # patient.assignedDoctorId=request.POST.get('assignedDoctorId')
+            patient.tests=request.POST.get('tests')
+            patient.prescription=request.POST.get('prescription')
+            patient.symptoms=request.POST.get('symptoms')
             patient.save()
-            return redirect('admin-view-patient')
-    return render(request,'hospital/admin_update_patient.html',context=mydict)
+            return redirect('doctor-view-patient')
+    return render(request,'hospital/doctor_update_patient.html',context=mydict)
 
 
 
@@ -638,24 +643,24 @@ def download_pdf_view(request,pk):
 
 
 #-----------------APPOINTMENT START--------------------------------------------------------------------
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
-def admin_appointment_view(request):
-    return render(request,'hospital/admin_appointment.html')
+@login_required(login_url='receptionistlogin')
+@user_passes_test(is_receptionist)
+def receptionist_appointment_view(request):
+    return render(request,'hospital/receptionist_appointment.html')
 
 
 
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
-def admin_view_appointment_view(request):
+@login_required(login_url='receptionistlogin')
+@user_passes_test(is_receptionist)
+def receptionist_view_appointment_view(request):
     appointments=models.Appointment.objects.all().filter(status=True)
-    return render(request,'hospital/admin_view_appointment.html',{'appointments':appointments})
+    return render(request,'hospital/receptionist_view_appointment.html',{'appointments':appointments})
 
 
 
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
-def admin_add_appointment_view(request):
+@login_required(login_url='receptionistlogin')
+@user_passes_test(is_receptionist)
+def receptionist_add_appointment_view(request):
     appointmentForm=forms.AppointmentForm()
     mydict={'appointmentForm':appointmentForm,}
     if request.method=='POST':
@@ -668,36 +673,36 @@ def admin_add_appointment_view(request):
             appointment.patientName=models.User.objects.get(id=request.POST.get('patientId')).first_name
             appointment.status=True
             appointment.save()
-        return HttpResponseRedirect('admin-view-appointment')
-    return render(request,'hospital/admin_add_appointment.html',context=mydict)
+        return HttpResponseRedirect('receptionist-view-appointment')
+    return render(request,'hospital/receptionist_add_appointment.html',context=mydict)
 
 
 
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
-def admin_approve_appointment_view(request):
+@login_required(login_url='receptionistlogin')
+@user_passes_test(is_receptionist)
+def receptionist_approve_appointment_view(request):
     #those whose approval are needed
     appointments=models.Appointment.objects.all().filter(status=False)
-    return render(request,'hospital/admin_approve_appointment.html',{'appointments':appointments})
+    return render(request,'hospital/receptionist_approve_appointment.html',{'appointments':appointments})
 
 
 
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@login_required(login_url='receptionistlogin')
+@user_passes_test(is_receptionist)
 def approve_appointment_view(request,pk):
     appointment=models.Appointment.objects.get(id=pk)
     appointment.status=True
     appointment.save()
-    return redirect(reverse('admin-approve-appointment'))
+    return redirect(reverse('receptionist-approve-appointment'))
 
 
 
-@login_required(login_url='adminlogin')
-@user_passes_test(is_admin)
+@login_required(login_url='receptionistlogin')
+@user_passes_test(is_receptionist)
 def reject_appointment_view(request,pk):
     appointment=models.Appointment.objects.get(id=pk)
     appointment.delete()
-    return redirect('admin-approve-appointment')
+    return redirect('receptionist-approve-appointment')
 #---------------------------------------------------------------------------------
 #------------------------ ADMIN RELATED VIEWS END ------------------------------
 #---------------------------------------------------------------------------------

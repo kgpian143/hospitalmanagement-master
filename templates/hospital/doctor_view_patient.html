@@ -48,6 +48,7 @@ facebook : fb.com/sumit.luv
           <th>Symptoms</th>
           <th>Mobile</th>
           <th>Address</th>
+          <th>Treatment</th>
 
         </tr>
       </thead>
@@ -58,6 +59,7 @@ facebook : fb.com/sumit.luv
         <td>{{p.symptoms}}</td>
         <td>{{p.mobile}}</td>
         <td>{{p.address}}</td>
+        <td><a class="btn btn-primary btn-xs" href="{% url 'update-patient' p.id  %}"><span class="glyphicon glyphicon-edit"></span></a></td>
       </tr>
       {% endfor %}
     </table>
