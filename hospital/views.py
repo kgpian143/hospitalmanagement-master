@@ -101,17 +101,23 @@ def patient_signup_view(request):
     return render(request,'hospital/patientsignup.html',context=mydict)
 
 def receptionist_signup_view(request):
-    form=forms.ReceptionistSigupForm()
+    userForm=forms.ReceptionistUserForm()
+    receptionistForm=forms.ReceptionistForm()
+    mydict={'userForm':userForm,'receptionistForm':receptionistForm}
     if request.method=='POST':
-        form=forms.ReceptionistSigupForm(request.POST)
-        if form.is_valid():
-            user=form.save()
+        userForm=forms.ReceptionistUserForm(request.POST)
+        receptionistForm=forms.ReceptionistForm(request.POST,request.FILES)
+        if userForm.is_valid() and receptionistForm.is_valid():
+            user=userForm.save()
             user.set_password(user.password)
             user.save()
-            my_admin_group = Group.objects.get_or_create(name='RECEPTIONIST')
-            my_admin_group[0].user_set.add(user)
+            receptionist=receptionistForm.save(commit=False)
+            receptionist.user=user
+            receptionist=receptionist.save()
+            my_receptionist_group = Group.objects.get_or_create(name='RECEPTIONIST')
+            my_receptionist_group[0].user_set.add(user)
             return HttpResponseRedirect('receptionistlogin')
-    return render(request,'hospital/receptionistsignup.html',{'form':form})
+    return render(request,'hospital/receptionistsignup.html',context=mydict)
 
 
 
@@ -246,7 +252,7 @@ def admin_receptionist_view(request):
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
 def admin_view_receptionist_view(request):
-    receptionists=models.Receptionist.objects.all().filter(status=True)
+    receptionists=models.Receptionist.objects.all()
     return render(request,'hospital/admin_view_receptionist.html',{'receptionists':receptionists})
 
 
@@ -290,27 +296,27 @@ def update_doctor_view(request,pk):
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
 def admin_add_receptionist_view(request):
-    userForm=forms.DoctorUserForm()
-    doctorForm=forms.DoctorForm()
-    mydict={'userForm':userForm,'doctorForm':doctorForm}
+    userForm=forms.ReceptionistUserForm()
+    receptionistForm=forms.ReceptionistForm()
+    mydict={'userForm':userForm ,'receptionistForm':receptionistForm }
     if request.method=='POST':
-        userForm=forms.DoctorUserForm(request.POST)
-        doctorForm=forms.DoctorForm(request.POST, request.FILES)
-        if userForm.is_valid() and doctorForm.is_valid():
+        userForm=forms.ReceptionistUserForm(request.POST)
+        receptionistForm=forms.ReceptionistForm(request.POST, request.FILES)
+        if userForm.is_valid() and receptionistForm.is_valid() :
             user=userForm.save()
             user.set_password(user.password)
             user.save()
 
-            doctor=doctorForm.save(commit=False)
-            doctor.user=user
-            doctor.status=True
-            doctor.save()
+            receptionist=receptionistForm.save(commit=False)
+            receptionist.user=user
+            # receptionist.status=True
+            receptionist.save()
 
-            my_doctor_group = Group.objects.get_or_create(name='DOCTOR')
-            my_doctor_group[0].user_set.add(user)
+            my_receptionist_group = Group.objects.get_or_create(name='RECEPTIONIST')
+            my_receptionist_group[0].user_set.add(user)
 
-        return HttpResponseRedirect('admin-view-doctor')
-    return render(request,'hospital/admin_add_doctor.html',context=mydict)
+        return HttpResponseRedirect('admin-view-receptionist')
+    return render(request,'hospital/admin_add_receptionist.html',context=mydict)
 
 
 

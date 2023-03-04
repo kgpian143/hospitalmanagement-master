@@ -12,14 +12,13 @@ class AdminSigupForm(forms.ModelForm):
         widgets = {
         'password': forms.PasswordInput()
         }
-class ReceptionistSigupForm(forms.ModelForm):
-    class Meta:
-        model=User
-        fields=['first_name','last_name','username','password']
-        widgets = {
-        'password': forms.PasswordInput()
-        }
-
+# class ReceptionistSigupForm(forms.ModelForm):
+#     class Meta:
+#         model=User
+#         fields=['first_name','last_name','username','password']
+#         widgets = {
+#         'password': forms.PasswordInput()
+#         }
 
 #for student related form
 class DoctorUserForm(forms.ModelForm):
@@ -33,6 +32,20 @@ class DoctorForm(forms.ModelForm):
     class Meta:
         model=models.Doctor
         fields=['address','mobile','department','status','profile_pic']
+
+
+
+class ReceptionistUserForm(forms.ModelForm):
+    class Meta:
+        model=User
+        fields=['first_name','last_name','username','password']
+        widgets = {
+        'password': forms.PasswordInput()
+        }
+class ReceptionistForm(forms.ModelForm):
+    class Meta:
+        model=models.Receptionist
+        fields=['address','mobile']
 
 
 
