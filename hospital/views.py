@@ -227,7 +227,7 @@ def admin_doctor_view(request):
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
 def admin_view_doctor_view(request):
-    doctors=models.Doctor.objects.all().filter(status=True)
+    doctors=models.Doctor.objects.all()
     return render(request,'hospital/admin_view_doctor.html',{'doctors':doctors})
 
 
@@ -488,14 +488,22 @@ def receptionist_add_patient_view(request):
 
             patient=patientForm.save(commit=False)
             patient.user=user
-            patient.status=True
+            # patient.status=True
             patient.assignedDoctorId=request.POST.get('assignedDoctorId')
             patient.save()
 
             my_patient_group = Group.objects.get_or_create(name='PATIENT')
             my_patient_group[0].user_set.add(user)
 
-        return HttpResponseRedirect('receptionist-view-patient')
+        # return HttpResponseRedirect('receptionist-view-patient')
+
+        accountapproval=models.Patient.objects.all().filter(user_id=request.user.id,status=True)
+        if accountapproval:
+            # patient.status=True
+            return redirect('receptionist-view-patient')
+        else:
+            return render(request,'hospital/receptionist_patient_wait.html')
+
     return render(request,'hospital/receptionist_add_patient.html',context=mydict)
 
 
