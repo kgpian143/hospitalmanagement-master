@@ -231,6 +231,12 @@ def admin_view_doctor_view(request):
     return render(request,'hospital/admin_view_doctor.html',{'doctors':doctors})
 
 
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_view_appointment(request):
+    appointments = models.Appointment.objects.all().filter(status=True)
+    return render(request, 'hospital/admin_view_appointment.html',{'appointments':appointments})
+
 
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
@@ -428,6 +434,9 @@ def update_patient_view(request,pk):
     if request.method=='POST':
         userForm=forms.PatientUserForm(request.POST,instance=user)
         patientForm=forms.PatientForm(request.POST,request.FILES,instance=patient)
+
+        # patientForm.fields['tests'].widget = forms.TextInput()
+        # patientForm.fields['prescription'].widget = forms.TextInput()
         print("yes1")
         if userForm.is_valid() and patientForm.is_valid():
             user=userForm.save()
@@ -436,11 +445,15 @@ def update_patient_view(request,pk):
             patient=patientForm.save(commit=False)
             patient.status=True
             print("yes")
-            # patient.assignedDoctorId=request.POST.get('assignedDoctorId')
-            patient.tests=request.POST.get('tests')
-            patient.prescription=request.POST.get('prescription')
-            patient.symptoms=request.POST.get('symptoms')
+            patient.assignedDoctorId=request.POST.get('assignedDoctorId')
+            # patient.tests=request.POST.get('tests')
+            # patient.prescription=request.POST.get('prescription')
+            # patient.symptoms=request.POST.get('symptoms')
             patient.save()
+
+            # patientForm.fields['tests'].widget = forms.TextInput()
+            # patientForm.fields['prescription'].widget = forms.TextInput()
+
             return redirect('doctor-view-patient')
     return render(request,'hospital/doctor_update_patient.html',context=mydict)
 
@@ -486,7 +499,9 @@ def receptionist_add_patient_view(request):
     if request.method=='POST':
         userForm=forms.PatientUserForm(request.POST)
         patientForm=forms.PatientForm(request.POST,request.FILES)
+        print("YES")
         if userForm.is_valid() and patientForm.is_valid():
+            print("YES1")
             user=userForm.save()
             user.set_password(user.password)
             user.save()
@@ -496,6 +511,12 @@ def receptionist_add_patient_view(request):
             # patient.status=True
             patient.assignedDoctorId=request.POST.get('assignedDoctorId')
             patient.save()
+
+            # patient.tests=request.POST.get('tests')
+            # patient.save()
+
+            # patient.prescription=request.POST.get('prescription')
+            # patient.save()
 
             my_patient_group = Group.objects.get_or_create(name='PATIENT')
             my_patient_group[0].user_set.add(user)

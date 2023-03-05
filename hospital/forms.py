@@ -62,9 +62,14 @@ class PatientForm(forms.ModelForm):
     #this will show dropdown __str__ method doctor model is shown on html so override it
     #to_field_name this will fetch corresponding value  user_id present in Doctor model and return it
     assignedDoctorId=forms.ModelChoiceField(queryset=models.Doctor.objects.all().filter(status=True),empty_label="Name and Department", to_field_name="user_id")
+
     class Meta:
         model=models.Patient
-        fields=['address','mobile','status','symptoms','profile_pic' , 'tests' , 'prescription']
+        fields=['address','mobile','status','symptoms','profile_pic' ]
+        # widgets = {
+        #     'tests': forms.HiddenInput(),
+        #     'prescription': forms.HiddenInput(),
+        # }
 
 
 
