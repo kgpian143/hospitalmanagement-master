@@ -79,6 +79,7 @@ urlpatterns = [
     path('receptionist-approve-appointment', views.receptionist_approve_appointment_view,name='receptionist-approve-appointment'),
     path('approve-appointment/<int:pk>', views.approve_appointment_view,name='approve-appointment'),
     path('reject-appointment/<int:pk>', views.reject_appointment_view,name='reject-appointment'),
+    path('admin-view-appointment', views.admin_view_appointment,name='admin-view-appointment'),
 ]
 
 
