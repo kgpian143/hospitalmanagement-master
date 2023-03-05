@@ -438,6 +438,19 @@ def update_patient_view(request,pk):
         # patientForm.fields['tests'].widget = forms.TextInput()
         # patientForm.fields['prescription'].widget = forms.TextInput()
         print("yes1")
+        if patientForm.is_valid():
+            print("valid")
+            # do something with the valid form data
+        else:
+            # the form data is invalid, print the error messages
+            print(patientForm.errors)
+
+        if userForm.is_valid():
+            print("valid2")
+            # do something with the valid form data
+        else:
+            # the form data is invalid, print the error messages
+            print(userForm.errors)
         if userForm.is_valid() and patientForm.is_valid():
             user=userForm.save()
             user.set_password(user.password)
@@ -500,6 +513,20 @@ def receptionist_add_patient_view(request):
         userForm=forms.PatientUserForm(request.POST)
         patientForm=forms.PatientForm(request.POST,request.FILES)
         print("YES")
+        # form = forms.PatientForm(request.POST, request.FILES)
+        if patientForm.is_valid():
+            print("valid")
+            # do something with the valid form data
+        else:
+            # the form data is invalid, print the error messages
+            print(patientForm.errors)
+
+        if userForm.is_valid():
+            print("valid2")
+            # do something with the valid form data
+        else:
+            # the form data is invalid, print the error messages
+            print(userForm.errors)
         if userForm.is_valid() and patientForm.is_valid():
             print("YES1")
             user=userForm.save()
