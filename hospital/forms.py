@@ -48,6 +48,18 @@ class ReceptionistForm(forms.ModelForm):
         fields=['address','mobile']
 
 
+class DeoUserForm(forms.ModelForm):
+    class Meta:
+        model=User
+        fields=['first_name','last_name','username','password']
+        widgets = {
+        'password': forms.PasswordInput()
+        }
+class DeoForm(forms.ModelForm):
+    class Meta:
+        model=models.Deo
+        fields=['address','mobile', 'status']
+
 
 #for teacher related form
 class PatientUserForm(forms.ModelForm):

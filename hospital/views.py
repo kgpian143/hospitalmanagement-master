@@ -42,6 +42,12 @@ def receptionistclick_view(request):
     return render(request,'hospital/receptionistclick.html')
 
 
+def deoclick_view(request):
+    if request.user.is_authenticated:
+        return HttpResponseRedirect('afterlogin')
+    return render(request,'hospital/deoclick.html')
+
+
 
 
 def admin_signup_view(request):
@@ -120,6 +126,26 @@ def receptionist_signup_view(request):
     return render(request,'hospital/receptionistsignup.html',context=mydict)
 
 
+def deo_signup_view(request):
+    userForm=forms.DeoUserForm()
+    deoForm=forms.DeoForm()
+    mydict={'userForm':userForm,'deoForm':deoForm}
+    if request.method=='POST':
+        userForm=forms.DeoUserForm(request.POST)
+        deoForm=forms.DeoForm(request.POST,request.FILES)
+        if userForm.is_valid() and deoForm.is_valid():
+            user=userForm.save()
+            user.set_password(user.password)
+            user.save()
+            deo=deoForm.save(commit=False)
+            deo.user=user
+            deo=deo.save()
+            my_deo_group = Group.objects.get_or_create(name='DEO')
+            my_deo_group[0].user_set.add(user)
+            return HttpResponseRedirect('deologin')
+    return render(request,'hospital/deosignup.html',context=mydict)
+
+
 
 
 
@@ -133,6 +159,8 @@ def is_patient(user):
     return user.groups.filter(name='PATIENT').exists()
 def is_receptionist(user):
     return user.groups.filter(name='RECEPTIONIST').exists()
+def is_deo(user):
+    return user.groups.filter(name='DEO').exists()
 
 
 #---------AFTER ENTERING CREDENTIALS WE CHECK WHETHER USERNAME AND PASSWORD IS OF ADMIN,DOCTOR OR PATIENT
@@ -143,6 +171,12 @@ def afterlogin_view(request):
         return redirect('doctor-dashboard')
     elif is_receptionist(request.user):
         return redirect('receptionist-dashboard')
+    elif is_deo(request.user):
+        accountapproval=models.Deo.objects.all().filter(user_id=request.user.id,status=True)
+        if accountapproval:
+            return redirect('deo-dashboard')
+        else:
+            return render(request,'hospital/deo_wait_for_approval.html')
     elif is_patient(request.user):
         accountapproval=models.Patient.objects.all().filter(user_id=request.user.id,status=True)
         if accountapproval:
@@ -215,6 +249,33 @@ def receptionist_dashboard_view(request):
     }
     return render(request,'hospital/receptionist_dashboard.html',context=mydict)
 
+@login_required(login_url='deologin')
+@user_passes_test(is_deo)
+def deo_dashboard_view(request):
+    #for both table in admin dashboard
+    # doctors=models.Doctor.objects.all().order_by('-id')
+    patients=models.Patient.objects.all().order_by('-id')
+    #for three cards
+    # doctorcount=models.Doctor.objects.all().filter(status=True).count()
+    # pendingdoctorcount=models.Doctor.objects.all().filter(status=False).count()
+
+    patientcount=models.Patient.objects.all().filter(status=True).count()
+    # pendingpatientcount=models.Patient.objects.all().filter(status=False).count()
+
+    # appointmentcount=models.Appointment.objects.all().filter(status=True).count()
+    # pendingappointmentcount=models.Appointment.objects.all().filter(status=False).count()
+    mydict={
+    # 'doctors':doctors,
+    'patients':patients,
+    # 'doctorcount':doctorcount,
+    # 'pendingdoctorcount':pendingdoctorcount,
+    'patientcount':patientcount,
+    # 'pendingpatientcount':pendingpatientcount,
+    # 'appointmentcount':appointmentcount,
+    # 'pendingappointmentcount':pendingappointmentcount,
+    }
+    return render(request,'hospital/deo_dashboard.html',context=mydict)
+
 
 # this view for sidebar click on admin page
 @login_required(login_url='adminlogin')
@@ -276,6 +337,32 @@ def delete_receptionist_from_hospital_view(request,pk):
 
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
+def admin_deo_view(request):
+    return render(request,'hospital/admin_deo.html')
+
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_view_deo_view(request):
+    deos=models.Deo.objects.all()
+    return render(request,'hospital/admin_view_deo.html',{'deos':deos})
+
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def delete_deo_from_hospital_view(request,pk):
+    deo=models.Deo.objects.get(id=pk)
+    user=models.User.objects.get(id=deo.user_id)
+    user.delete()
+    deo.delete()
+    return redirect('admin-view-deo')
+
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
 def update_doctor_view(request,pk):
     doctor=models.Doctor.objects.get(id=pk)
     user=models.User.objects.get(id=doctor.user_id)
@@ -324,6 +411,61 @@ def admin_add_receptionist_view(request):
         return HttpResponseRedirect('admin-view-receptionist')
     return render(request,'hospital/admin_add_receptionist.html',context=mydict)
 
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_add_deo_view(request):
+    userForm=forms.DeoUserForm()
+    deoForm=forms.DeoForm()
+    mydict={'userForm':userForm ,'deoForm':deoForm }
+    if request.method=='POST':
+        userForm=forms.DeoUserForm(request.POST)
+        deoForm=forms.DeoForm(request.POST, request.FILES)
+        if userForm.is_valid() and deoForm.is_valid() :
+            user=userForm.save()
+            user.set_password(user.password)
+            user.save()
+
+            deo=deoForm.save(commit=False)
+            deo.user=user
+            deo.status=True
+            deo.save()
+
+            my_deo_group = Group.objects.get_or_create(name='DEO')
+            my_deo_group[0].user_set.add(user)
+
+        return HttpResponseRedirect('admin-view-deo')
+    return render(request,'hospital/admin_add_deo.html',context=mydict)
+
+
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def admin_approve_deo_view(request):
+    #those whose approval are needed
+    deos=models.Deo.objects.all().filter(status=False)
+    return render(request,'hospital/admin_approve_deo.html',{'deos':deos})
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def approve_deo_view(request,pk):
+    deo=models.Deo.objects.get(id=pk)
+    deo.status=True
+    deo.save()
+    return redirect(reverse('admin-approve-deo'))
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def reject_deo_view(request,pk):
+    deo=models.Deo.objects.get(id=pk)
+    user=models.User.objects.get(id=deo.user_id)
+    user.delete()
+    deo.delete()
+    return redirect('admin-approve-deo')
 
 
 @login_required(login_url='adminlogin')
@@ -381,6 +523,34 @@ def reject_doctor_view(request,pk):
     return redirect('admin-approve-doctor')
 
 
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def approve_deo_view(request,pk):
+    deo=models.Deo.objects.get(id=pk)
+    deo.status=True
+    deo.save()
+    return redirect(reverse('admin-approve-deo'))
+
+
+@login_required(login_url='adminlogin')
+@user_passes_test(is_admin)
+def reject_deo_view(request,pk):
+    deo=models.Deo.objects.get(id=pk)
+    user=models.User.objects.get(id=deo.user_id)
+    user.delete()
+    deo.delete()
+    return redirect('admin-approve-deo')
+
+
+@login_required(login_url='deologin')
+@user_passes_test(is_deo)
+def deo_fill_patient_detail_view(request):
+    patients=models.Patient.objects.all().filter(status=True)
+    return render(request,'hospital/deo_discharge_patient.html',{'patients':patients})
+
+
+
+
 
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
@@ -410,6 +580,52 @@ def receptionist_view_patient_view(request):
     return render(request,'hospital/receptionist_view_patient.html',{'patients':patients})
 
 
+@login_required(login_url='receptionistlogin')
+@user_passes_test(is_receptionist)
+def receptionist_patient_discharge(request , pk):
+    # patients=models.Patient.objects.all().filter(status=True)
+    patient=models.Patient.objects.get(id=pk)
+    days=(date.today()-patient.admitDate) #2 days, 0:00:00
+    assignedDoctor=models.User.objects.all().filter(id=patient.assignedDoctorId)
+    discharge_details=models.PatientDischargeDetails.objects.all().filter(patientId = pk)
+    # print(len(assignedDoctor))
+    d=days.days # only how many day that is 2
+    patientDict={
+        'patientId':pk,
+        'name':patient.get_name,
+        'mobile':patient.mobile,
+        'address':patient.address,
+        'symptoms':patient.symptoms,
+        'admitDate':patient.admitDate,
+        'todayDate':date.today(),
+        'day':d,
+        'tests':patient.tests,
+        'prescription':patient.prescription,
+        'assignedDoctorName':assignedDoctor[0].first_name,
+        'roomCharge' : discharge_details[0].roomCharge,
+        'doctorFee' : discharge_details[0].doctorFee,
+        'medicineCost' : discharge_details[0].medicineCost,
+        'OtherCharge' : discharge_details[0].OtherCharge,
+        'total' : discharge_details[0].total,
+        'testResult' : discharge_details[0].testresults,
+
+    }
+    patient=models.Patient.objects.get(id=pk)
+    user=models.User.objects.get(id=patient.user_id)
+    user.delete()
+    patient.delete()
+    # print(assignedDoctor[0].first_name)
+    # if request.method == 'POST':
+    #     feeDict ={
+
+    #         'roomCharge':int(request.POST['roomCharge'])*int(d),
+    #         'doctorFee':request.POST['doctorFee'],
+    #         'medicineCost' : request.POST['medicineCost'],
+    #         'OtherCharge' : request.POST['OtherCharge'],
+    #         'total':(int(request.POST['roomCharge'])*int(d))+int(request.POST['doctorFee'])+int(request.POST['medicineCost'])+int(request.POST['OtherCharge']),
+    #         'testResult':request.POST['testResult']
+    #     }
+    return render(request,'hospital/patient_final_bill.html' ,context=patientDict)
 
 @login_required(login_url='adminlogin')
 @user_passes_test(is_admin)
@@ -549,12 +765,13 @@ def receptionist_discharge_patient_view(request):
 
 
 
-@login_required(login_url='receptionistlogin')
-@user_passes_test(is_receptionist)
+@login_required(login_url='deologin')
+@user_passes_test(is_deo)
 def discharge_patient_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
     days=(date.today()-patient.admitDate) #2 days, 0:00:00
     assignedDoctor=models.User.objects.all().filter(id=patient.assignedDoctorId)
+    # print(len(assignedDoctor))
     d=days.days # only how many day that is 2
     patientDict={
         'patientId':pk,
@@ -565,15 +782,18 @@ def discharge_patient_view(request,pk):
         'admitDate':patient.admitDate,
         'todayDate':date.today(),
         'day':d,
-        'assignedDoctorName':assignedDoctor[0].first_name,
+        'assignedDoctorName':assignedDoctor[0].first_name
     }
+    # print(assignedDoctor[0].first_name)
     if request.method == 'POST':
         feeDict ={
+
             'roomCharge':int(request.POST['roomCharge'])*int(d),
             'doctorFee':request.POST['doctorFee'],
             'medicineCost' : request.POST['medicineCost'],
             'OtherCharge' : request.POST['OtherCharge'],
-            'total':(int(request.POST['roomCharge'])*int(d))+int(request.POST['doctorFee'])+int(request.POST['medicineCost'])+int(request.POST['OtherCharge'])
+            'total':(int(request.POST['roomCharge'])*int(d))+int(request.POST['doctorFee'])+int(request.POST['medicineCost'])+int(request.POST['OtherCharge']),
+            'testResult':request.POST['testResult']
         }
         patientDict.update(feeDict)
         #for updating to database patientDischargeDetails (pDD)
@@ -592,7 +812,9 @@ def discharge_patient_view(request,pk):
         pDD.doctorFee=int(request.POST['doctorFee'])
         pDD.OtherCharge=int(request.POST['OtherCharge'])
         pDD.total=(int(request.POST['roomCharge'])*int(d))+int(request.POST['doctorFee'])+int(request.POST['medicineCost'])+int(request.POST['OtherCharge'])
+        pDD.testresults=request.POST['testResult']
         pDD.save()
+        
         return render(request,'hospital/patient_final_bill.html',context=patientDict)
     return render(request,'hospital/patient_generate_bill.html',context=patientDict)
 

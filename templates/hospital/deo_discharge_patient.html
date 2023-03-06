@@ -1,4 +1,4 @@
-{% extends 'hospital/receptionist_base.html' %}
+{% extends 'hospital/deo_base.html' %}
 {% block content %}
 
 <head>
@@ -42,7 +42,7 @@ facebook : fb.com/sumit.luv
         <td> {{p.get_name}}</td>
         <td>{{p.symptoms}}</td>
         <td>{{p.mobile}}</td>
-        <td><a class="btn btn-primary btn-xs" href="{% url 'receptionist-discharge-patient' p.id  %}"><span class="glyphicon glyphicon-log-out"></span></a></td>
+        <td><a class="btn btn-primary btn-xs" href="{% url 'discharge-patient' p.id  %}"><span class="glyphicon glyphicon-log-out"></span></a></td>
       </tr>
       {% endfor %}
     </table>
