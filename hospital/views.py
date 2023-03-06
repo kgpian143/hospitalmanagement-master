@@ -426,51 +426,26 @@ def delete_patient_from_hospital_view(request,pk):
 @user_passes_test(is_doctor)
 def update_patient_view(request,pk):
     patient=models.Patient.objects.get(id=pk)
-    user=models.User.objects.get(id=patient.user_id)
 
-    userForm=forms.PatientUserForm(instance=user)
+    SYMPTOMS=patient.symptoms
+    ADDRESS=patient.address
+    MOBILE=patient.mobile
+    DOCID=patient.assignedDoctorId
     patientForm=forms.PatientForm(request.FILES,instance=patient)
-    mydict={'userForm':userForm,'patientForm':patientForm}
+    mydict={'patientForm':patientForm}
     if request.method=='POST':
-        userForm=forms.PatientUserForm(request.POST,instance=user)
         patientForm=forms.PatientForm(request.POST,request.FILES,instance=patient)
-
-        # patientForm.fields['tests'].widget = forms.TextInput()
-        # patientForm.fields['prescription'].widget = forms.TextInput()
-        print("yes1")
         if patientForm.is_valid():
-            print("valid")
-            # do something with the valid form data
-        else:
-            # the form data is invalid, print the error messages
-            print(patientForm.errors)
-
-        if userForm.is_valid():
-            print("valid2")
-            # do something with the valid form data
-        else:
-            # the form data is invalid, print the error messages
-            print(userForm.errors)
-        if userForm.is_valid() and patientForm.is_valid():
-            user=userForm.save()
-            user.set_password(user.password)
-            user.save()
             patient=patientForm.save(commit=False)
+            # print(SYMPTOMS)
             patient.status=True
-            print("yes")
-            patient.assignedDoctorId=request.POST.get('assignedDoctorId')
-            # patient.tests=request.POST.get('tests')
-            # patient.prescription=request.POST.get('prescription')
-            # patient.symptoms=request.POST.get('symptoms')
+            patient.symptoms=SYMPTOMS
+            patient.address=ADDRESS
+            patient.mobile=MOBILE
+            patient.assignedDoctorId=DOCID
             patient.save()
-
-            # patientForm.fields['tests'].widget = forms.TextInput()
-            # patientForm.fields['prescription'].widget = forms.TextInput()
-
             return redirect('doctor-view-patient')
     return render(request,'hospital/doctor_update_patient.html',context=mydict)
-
-
 
 
 
@@ -512,47 +487,20 @@ def receptionist_add_patient_view(request):
     if request.method=='POST':
         userForm=forms.PatientUserForm(request.POST)
         patientForm=forms.PatientForm(request.POST,request.FILES)
-        print("YES")
-        # form = forms.PatientForm(request.POST, request.FILES)
-        if patientForm.is_valid():
-            print("valid")
-            # do something with the valid form data
-        else:
-            # the form data is invalid, print the error messages
-            print(patientForm.errors)
-
-        if userForm.is_valid():
-            print("valid2")
-            # do something with the valid form data
-        else:
-            # the form data is invalid, print the error messages
-            print(userForm.errors)
         if userForm.is_valid() and patientForm.is_valid():
-            print("YES1")
             user=userForm.save()
             user.set_password(user.password)
             user.save()
 
             patient=patientForm.save(commit=False)
             patient.user=user
-            # patient.status=True
             patient.assignedDoctorId=request.POST.get('assignedDoctorId')
             patient.save()
-
-            # patient.tests=request.POST.get('tests')
-            # patient.save()
-
-            # patient.prescription=request.POST.get('prescription')
-            # patient.save()
-
             my_patient_group = Group.objects.get_or_create(name='PATIENT')
             my_patient_group[0].user_set.add(user)
 
-        # return HttpResponseRedirect('receptionist-view-patient')
-
         accountapproval=models.Patient.objects.all().filter(user_id=request.user.id,status=True)
         if accountapproval:
-            # patient.status=True
             return redirect('receptionist-view-patient')
         else:
             return render(request,'hospital/receptionist_patient_wait.html')

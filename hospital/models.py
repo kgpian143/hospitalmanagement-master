@@ -53,8 +53,8 @@ class Patient(models.Model):
     assignedDoctorId = models.PositiveIntegerField(null=True)
     admitDate=models.DateField(auto_now=True)
     status=models.BooleanField(default=False)
-    tests = models.CharField(max_length=100,default='--')
-    prescription = models.CharField(max_length=500,default='--')
+    tests = models.CharField(max_length=100,default='Not Treated')
+    prescription = models.CharField(max_length=500,default='Not Treated')
     @property
     def get_name(self):
         return self.user.first_name+" "+self.user.last_name
