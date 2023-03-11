@@ -100,7 +100,7 @@ class PatientDischargeDetails(models.Model):
     address = models.CharField(max_length=40)
     mobile = models.CharField(max_length=20,null=True)
     symptoms = models.CharField(max_length=100,null=True)
-    testresults = models.CharField(max_length=100,null=True)
+    testresults = models.CharField(max_length=500,null=True)
     admitDate=models.DateField(null=False)
     releaseDate=models.DateField(null=False)
     daySpent=models.PositiveIntegerField(null=False)
@@ -112,6 +112,3 @@ class PatientDischargeDetails(models.Model):
     total=models.PositiveIntegerField(null=False)
 
 
-#Developed By : sumit kumar
-#facebook : fb.com/sumit.luv
-#Youtube :youtube.com/lazycoders

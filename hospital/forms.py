@@ -102,7 +102,10 @@ class PatientForm(forms.ModelForm):
 
 
 
-
+class RoomForm(forms.ModelForm):
+    class Meta:
+        model=models.Receptionist
+        fields=['address','mobile']
 
 class AppointmentForm(forms.ModelForm):
     doctorId=forms.ModelChoiceField(queryset=models.Doctor.objects.all().filter(status=True),empty_label="Doctor Name and Department", to_field_name="user_id")
