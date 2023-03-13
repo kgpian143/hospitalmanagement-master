@@ -51,7 +51,7 @@
 </head>
 
 
-<body>
+<body style="background-image: url('/static/images/doctor1.jpg'); background-repeat: no-repeat; background-size: cover;">
   {% include "hospital/navbar.html" %}
   <br>
   <br>
@@ -61,7 +61,7 @@
 
 
 
-  <!--- signup page for doctor by admin(sumit)  ---------->
+  <!--- signup page for doctor by admin ---------->
   <form method="post" enctype="multipart/form-data">
     {% csrf_token %}
     <div class="container register-form">
