@@ -782,7 +782,9 @@ def discharge_patient_view(request,pk):
         'admitDate':patient.admitDate,
         'todayDate':date.today(),
         'day':d,
-        'assignedDoctorName':assignedDoctor[0].first_name
+        'assignedDoctorName':assignedDoctor[0].first_name,
+        'prescription':patient.prescription,
+        'tests':patient.tests
     }
     # print(assignedDoctor[0].first_name)
     if request.method == 'POST':
@@ -815,7 +817,8 @@ def discharge_patient_view(request,pk):
         pDD.testresults=request.POST['testResult']
         pDD.save()
         
-        return render(request,'hospital/patient_final_bill.html',context=patientDict)
+        # return render(request,'hospital/patient_final_bill.html',context=patientDict)
+        return redirect('deo-dashboard')
     return render(request,'hospital/patient_generate_bill.html',context=patientDict)
 
 
